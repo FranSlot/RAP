@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rapdb-data
+    namespace : ampersand.rap
+    labels:
+        ampersand.target: rap.db.data.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap/db/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap.db.pvc
+    name: rap-db-data
+    namespace : ampersand.rap
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: rap-db-service
+    namespace : ampersand.rap
+    labels : 
+        ampersand.target: rap.db.service
+spec:
+    ports:
+    - name: "rap-db-port"
+      port: 8080
+      targetPort: 80
+    selector:
+        ampersand.target: rap.db.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        ampersand.target: rap.db.deployment
+    name: rab-db
+    namespace : ampersand.rap
+spec:
+    selector:
+        matchLabels:
+            ampersand.target: rap.db.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                ampersand.target: rap.db.pod
+        spec:
+            hostname: rap-db
+            containers:
+            - image: ampersandtarski/rap3-db
+              name: rap-db
+              volumeMounts:
+              - mountPath: /var/lib/mysql
+                name: rap-db-data
+              ports:
+              - containerPort : 80        
+            restartPolicy: Always
+            volumes:
+            - name: rap-db-data
+              persistentVolumeClaim:
+                claimName: rap-db-data      
+status: {}
+    

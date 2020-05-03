@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        ampersand.target: flask.hello.deployment
+    name: flask-hello
+spec:
+    progressDeadlineSeconds : 120
+    replicas: 1
+    selector:
+        matchLabels:
+            ampersand.target: flask.hello.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                ampersand.target: flask.hello.pod
+    spec:
+        hostname: flask-hello
+        subdomain: k8s
+        containers:
+        - image: localhost:5002/flask-hello
+          name: flask
+          volumeMounts:
+          - mountPath: /mnt/flask-hello
+            name: flask-hello-data
+          ports:
+          - containerPort : 5000        
+        restartPolicy: Always
+        volumes:
+        - name: flask-hello-data
+          persistentVolumeClaim:
+            claimName: flask-hello-data      
+status: {}

@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: flask-echo-data
+    labels:
+        verify.flask.target: flask.echo.data.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/flask/echo/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        verify.flask.target: flask.echo.pvc
+    name: flask-echo-data
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: flask-echo-service
+    labels : 
+        verify.flask.target: flask.echo.service
+spec:
+    ports:
+    - name: "flask-echo-port"
+      port: 8080
+      targetPort: 5000
+    selector:
+        verify.flask.target: flask.echo.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        verify.flask.target: flask.echo.deployment
+    name: flask-echo
+spec:
+    progressDeadlineSeconds : 120
+    replicas: 1
+    selector:
+        matchLabels:
+            verify.flask.target: flask.echo.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                verify.flask.target: flask.echo.pod           
+        spec:
+            hostname: flask-echo
+            containers:
+            - image: localhost:5002/flask-echo
+              name: flask
+              volumeMounts:
+              - mountPath: /mnt/flask-echo
+                name: flask-echo-data
+              ports:
+              - containerPort : 5000        
+            restartPolicy: Always
+            volumes:
+            - name: flask-echo-data
+              persistentVolumeClaim:
+                claimName: flask-echo-data      
+status: {}
+    
