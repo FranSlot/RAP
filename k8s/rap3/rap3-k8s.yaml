@@ -159,6 +159,10 @@ spec:
               env:
               - name: AMP_PROTO_ENV_NAME
                 value: default  
+              # - name: AMPERSAND_DBHOST
+              #  value: db
+              # - name: AMPERSAND_DBNAME
+              #  value: ampersand
             restartPolicy: Always           
             volumes:
             - name: rap3-data

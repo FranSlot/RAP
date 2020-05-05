@@ -38,7 +38,9 @@ status: {}
 apiVersion: v1
 kind: Service
 metadata:
-    name: rap-db-service
+    #ampersand database is hardcode in image to db
+    name: db
+    #name: rap-db-service
     #namespace: ampersand-rap
     labels : 
         ampersand.target: rap.db.service
