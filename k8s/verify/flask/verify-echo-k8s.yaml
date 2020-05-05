@@ -35,10 +35,14 @@ metadata:
     labels : 
         verify.flask.target: flask.echo.service
 spec:
+    # NodePort, service:port is exposed AND service is avaible outside of node
+    type: NodePort
     ports:
     - name: "flask-echo-port"
-      port: 8080
+      # No effect if spec.type=NodePort
+      port: 8080      
       targetPort: 5000
+      nodePort: 31001
     selector:
         verify.flask.target: flask.echo.pod
 status: 
@@ -51,7 +55,7 @@ metadata:
         verify.flask.target: flask.echo.deployment
     name: flask-echo
 spec:
-    progressDeadlineSeconds : 120
+    progressDeadlineSeconds: 120
     replicas: 1
     selector:
         matchLabels:

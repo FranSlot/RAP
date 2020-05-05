@@ -11,9 +11,8 @@ docker image tag flask-echo localhost:5002/flask-echo
 docker image tag flask-hello localhost:5002/flask-hello
 
 # Run the local registry on port 5002
-docker run --rm -d --publish=5002:5000 registry
-
 # Push the docker image
+docker run --rm -d --publish=5002:5000 registry
 docker push localhost:5002/flask-echo
 docker push localhost:5002/flask-hello
 
@@ -49,4 +48,9 @@ alias k=kubectl
 complete -F __start_kubectl k
 
 ## if all fails ...
+kubectl completion bash > kubectl.completion
+source kubectl.completion
+rm kubectl.completion
 source /usr/local/etc/profile.d/bash_completion.sh
+alias k=kubectl
+complete -F __start_kubectl k

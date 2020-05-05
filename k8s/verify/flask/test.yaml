@@ -2,34 +2,25 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     labels:
-        ampersand.target: flask.hello.deployment
-    name: flask-hello
+        ampersand.target: phptools.deployment
+    name: phptools
+    #namespace: ampersand-rap
 spec:
-    progressDeadlineSeconds : 120
-    replicas: 1
     selector:
         matchLabels:
-            ampersand.target: flask.hello.pod
+            ampersand.target: phptools.pod
     strategy:
         type: RollingUpdate
     template:
         metadata:
             labels:
-                ampersand.target: flask.hello.pod
-    spec:
-        hostname: flask-hello
-        subdomain: k8s
-        containers:
-        - image: localhost:5002/flask-hello
-          name: flask
-          volumeMounts:
-          - mountPath: /mnt/flask-hello
-            name: flask-hello-data
-          ports:
-          - containerPort : 5000        
-        restartPolicy: Always
-        volumes:
-        - name: flask-hello-data
-          persistentVolumeClaim:
-            claimName: flask-hello-data      
+                ampersand.target: phptools.pod
+        spec:
+            hostname: phptools
+            containers:
+            - image: phpmyadmin/phpmyadmin
+              name: phptools        
+              ports:     
+              - containerPort : 8080        
+            restartPolicy: Always            
 status: {}

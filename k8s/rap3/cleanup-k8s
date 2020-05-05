@@ -1,0 +1,5 @@
+kubectl delete svc rapdb -n=ampersand-rap
+kubectl delete deployment rapdb -n=ampersand-rap
+kubectl delete pvc rapdb-data -n=ampersand-rap
+kubectl delete pv rapdb-data -n=ampersand-rap
+for pod in $(kubectl get pod | grep rapdb | cut -d' ' -f1);do echo kubectl delete pod $pod -n=ampersand-rap;done

@@ -35,10 +35,14 @@ metadata:
     labels : 
         verify.flask.target: flask.hello.service
 spec:
+    # NodePort, service:port is exposed AND service is avaible outside of node    
+    type: NodePort
     ports:
     - name: "flask-hello-port"
+      # No effect if spec.type=NodePort
       port: 8080
       targetPort: 5000
+      nodePort: 31002
     selector:
         verify.flask.target: flask.hello.pod
 status: 
@@ -71,7 +75,7 @@ spec:
               - mountPath: /mnt/flask-hello
                 name: flask-hello-data
               ports:
-              - containerPort : 5000        
+              - containerPort: 5000        
             restartPolicy: Always
             volumes:
             - name: flask-hello-data
