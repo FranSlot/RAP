@@ -155,8 +155,11 @@ spec:
                 name: rap3-logs
               ports:
               - containerPort : 80        
-              - containerPort : 443     
-            restartPolicy: Always
+              - containerPort : 443   
+              env:
+              - name: AMP_PROTO_ENV_NAME
+                value: default  
+            restartPolicy: Always           
             volumes:
             - name: rap3-data
               persistentVolumeClaim:
