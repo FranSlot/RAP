@@ -1,4 +1,4 @@
-kubectl delete svc rap-db-service
+kubectl delete svc db
 kubectl delete deployment rap-db
 kubectl delete pvc rap-db-data
 kubectl delete pv rap-db-data
