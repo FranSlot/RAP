@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx" # prevents default GCE ingress controller to handle this ingress
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod" # uncomment later, see cert-manager README first
+spec:
+  rules:
+  - host: rap.tarski.nl
+    http:
+      paths:
+      - backend:
+          serviceName: rap3-service # must be in same namespace as this ingress
+          servicePort: 80
+  ## see ingress-student-template.yaml for additional rules to route trafic for student prototypes
+  tls:
+  - hosts:
+    - rap.tarski.nl
+    secretName: tls-cert-letsencrypt-rap-tarski-nl
