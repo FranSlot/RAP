@@ -5,6 +5,13 @@ TODO:
 1. RAP3 app must deploy a new pod consisting of a container based on the `rap3-student-proto` image. See [Dockerfile](../../RAP3USER/Dockerfile)
 2. RAP3 app must add a service resource that points to this created pod. Service is called `student123-service`, `student456-service`, etc
 3. RAP3 app must add a ingress resource that redirects external traffic to the service. See [ingress template](./ingress/ingress-student-template.yaml)
+
+TODO:
+1. Add cronjob to cluster to cleanup created resources after x period of time. See [crobjob spec](./cleanup-job/cleanup-job.yaml)
+1. Cleanup of studentproto services and ingresses still needs to be configured
+
+# Other work
+
 # connection test with squirrel 
 http://www.squirrelsql.org/#installation
 # connection jar
