@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata: 
-  name: ampersand-rap
+  name: prod
 ---
 apiVersion: v1
 kind: Secret
@@ -15,7 +15,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: phptools-service
-    #namespace: ampersand-rap
+    namespace: prod
     labels : 
         ampersand.target: phptools.service
 spec:
@@ -36,7 +36,7 @@ metadata:
     labels:
         ampersand.target: phptools.deployment
     name: phptools
-    #namespace: ampersand-rap
+    namespace: prod
 spec:
     selector:
         matchLabels:

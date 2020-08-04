@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Namespace
 metadata: 
-  name: ampersand-rap
+  name: prod
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
     name: rap3-data
-    #namespace: ampersand-rap
+    namespace: prod
     labels:
         ampersand.target: rap3.data.pv
 spec:
@@ -23,7 +23,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
     name: rap3-scripts
-    #namespace: ampersand-rap
+    namespace: prod
     labels:
         ampersand.target: rap3.scripts.pv
 spec:
@@ -39,7 +39,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
     name: rap3-logs
-    #namespace: ampersand-rap
+    namespace: prod
     labels:
         ampersand.target: rap3.logs.pv
 spec:
@@ -57,7 +57,7 @@ metadata:
     labels:
         ampersand.target: rap3.data.pvc
     name: rap3-data
-    #namespace: ampersand-rap
+    namespace: prod
 spec:
     storageClassName: hostpath
     accessModes:
@@ -73,7 +73,7 @@ metadata:
     labels:
         ampersand.target: rap3.scripts.pvc
     name: rap3-scripts
-    #namespace: ampersand-rap
+    namespace: prod
 spec:
     storageClassName: hostpath
     accessModes:
@@ -89,7 +89,7 @@ metadata:
     labels:
         ampersand.target: rap3.logs.pvc
     name: rap3-logs
-    #namespace: ampersand-rap
+    namespace: prod
 spec:
     storageClassName: hostpath
     accessModes:
@@ -103,7 +103,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: rap3-service
-    #namespace: ampersand-rap
+    namespace: prod
     labels : 
         ampersand.target: rap3.service
 spec:
@@ -130,7 +130,7 @@ metadata:
     labels:
         ampersand.target: rap3.deployment
     name: rap3
-    #namespace: ampersand-rap
+    namespace: prod
 spec:
     selector:
         matchLabels:
