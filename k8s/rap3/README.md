@@ -1,6 +1,8 @@
-# RAP3 student prototypes
+# This directory, ../RAP/k8s/rap3, contains the manifests needed to spin up RAP3 on a Kubernetes platform.
 
-In order to spinup new pods for student prototypes the following steps need to be done:
+
+
+# In order to spinup new pods for student prototypes the following steps need to be done:
 TODO:
 1. RAP3 app must deploy a new pod consisting of a container based on the `rap3-student-proto` image. See [Dockerfile](../../RAP3USER/Dockerfile)
 2. RAP3 app must add a service resource that points to this created pod. Service is called `student123-service`, `student456-service`, etc
@@ -18,7 +20,7 @@ http://www.squirrelsql.org/#installation
 https://downloads.mariadb.com/Connectors/java/connector-java-2.6.0/
 # copy JAR to SQuirreLSQL.app/Contents/Resources/Java/lib
 
-# start maria db  with docker
+# start maria db with docker
 # default database mysql
 docker run --publish=3306:3306 -e MYSQL_ROOT_PASSWORD=maria1! -d -v /Users/mwa17610/volumes/dck/rap/db/data:/var/lib/mysql mariadb
 # connection URL 
