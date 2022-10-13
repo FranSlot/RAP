@@ -1,0 +1,4 @@
+kubectl delete svc phptools-service
+kubectl delete deployment phptools
+for pod in $(kubectl get pod | grep phptools | cut -d' ' -f1);do echo kubectl delete pod $pod;done
+

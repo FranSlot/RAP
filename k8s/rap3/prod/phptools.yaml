@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: prod
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rap-db-secrets
+type: Opaque
+data:
+  root-password: si1IqHMBbWsDyktB
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: phptools-service
+    namespace: prod
+    labels : 
+        ampersand.target: phptools.service
+spec:
+    type: NodePort
+    ports:
+    - name: "phptools-port"
+      port: 8080
+      targetPort: 80
+      nodePort: 31101
+    selector:
+        ampersand.target: phptools.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        ampersand.target: phptools.deployment
+    name: phptools
+    namespace: prod
+spec:
+    selector:
+        matchLabels:
+            ampersand.target: phptools.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                ampersand.target: phptools.pod
+        spec:
+            hostname: phptools
+            containers:
+            - image: phpmyadmin/phpmyadmin
+              name: phptools        
+              ports:     
+              - containerPort : 80   
+              env:
+              - name: PMA_HOST
+              # ampersand DB host is db : TODO refactor to rap-db
+                value: db
+              - name: PMA_PORT
+                value: "3306"
+              - name: PMA_USER
+                value: ampersand
+              - name: PMA_PASSWORD
+                value: ampersand
+              #- name: MYSQL_ROOT_PASSWORD
+              #  valueFrom:
+              #    secretKeyRef:
+              #      name: rap-db-secrets
+              #      key: root-password
+            restartPolicy: Always            
+status: {}

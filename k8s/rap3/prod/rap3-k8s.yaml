@@ -1,0 +1,178 @@
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: prod
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap3-data
+    namespace: prod
+    labels:
+        ampersand.target: rap3.data.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap3/data"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap3-scripts
+    namespace: prod
+    labels:
+        ampersand.target: rap3.scripts.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap3/scripts"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap3-logs
+    namespace: prod
+    labels:
+        ampersand.target: rap3.logs.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap3/log"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap3.data.pvc
+    name: rap3-data
+    namespace: prod
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap3.scripts.pvc
+    name: rap3-scripts
+    namespace: prod
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap3.logs.pvc
+    name: rap3-logs
+    namespace: prod
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: rap3-service
+    namespace: prod
+    labels : 
+        ampersand.target: rap3.service
+spec:
+    type: NodePort
+    ports:
+    - name: "rap3-http-port"
+      # Not used it spec.type=NodePort
+      port: 80
+      targetPort: 80
+      nodePort: 31102
+    - name: "rap3-https-port"
+      # Not used it spec.type=NodePort
+      port: 443
+      targetPort: 443
+      nodePort: 31103
+    selector:
+        ampersand.target: rap3.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        ampersand.target: rap3.deployment
+    name: rap3
+    namespace: prod
+spec:
+    selector:
+        matchLabels:
+            ampersand.target: rap3.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                ampersand.target: rap3.pod
+        spec:
+            hostname: rap3
+            containers:
+            - image: ampersandtarski/ampersand-rap:latest
+              name: rap-db
+              volumeMounts:
+              - mountPath: /var/www/data
+                name: rap3-data
+              - mountPath: /var/www/data/scripts
+                name: rap3-scripts
+              - mountPath: /var/www/log
+                name: rap3-logs
+              ports:
+              - containerPort : 80        
+              - containerPort : 443   
+              env:
+              - name: AMP_PROTO_ENV_NAME
+                value: default  
+              # - name: AMPERSAND_DBHOST
+              #  value: db
+              # - name: AMPERSAND_DBNAME
+              #  value: ampersand
+            restartPolicy: Always           
+            volumes:
+            - name: rap3-data
+              persistentVolumeClaim:
+                claimName: rap3-data      
+            - name: rap3-scripts
+              persistentVolumeClaim:
+                claimName: rap3-scripts      
+            - name: rap3-logs
+              persistentVolumeClaim:
+                claimName: rap3-logs     
+status: {}
+    

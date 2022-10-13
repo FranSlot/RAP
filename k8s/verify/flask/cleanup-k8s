@@ -1,0 +1,9 @@
+kubectl delete svc flask-hello-service
+kubectl delete svc flask-echo-service
+kubectl delete deployment flask-hello
+kubectl delete deployment flask-echo
+kubectl delete pvc flask-echo-data
+kubectl delete pvc flask-hello-data
+kubectl delete pv flask-echo-data
+kubectl delete pv flask-hello-data
+for pod in $(kubectl get pod | grep flask | cut -d' ' -f1);do echo kubectl delete pod $pod;done

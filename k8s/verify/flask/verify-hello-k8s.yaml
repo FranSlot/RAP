@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: flask-hello-data
+    labels:
+        verify.flask.target: flask.hello.data.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/flask/hello/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        verify.flask.target: flask.hello.pvc
+    name: flask-hello-data
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: flask-hello-service
+    labels : 
+        verify.flask.target: flask.hello.service
+spec:
+    # NodePort, service:port is exposed AND service is avaible outside of node    
+    type: NodePort
+    ports:
+    - name: "flask-hello-port"
+      # No effect if spec.type=NodePort
+      port: 8080
+      targetPort: 5000
+      nodePort: 31002
+    selector:
+        verify.flask.target: flask.hello.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        verify.flask.target: flask.hello.deployment
+    name: flask-hello
+spec:
+    progressDeadlineSeconds : 120
+    replicas: 1
+    selector:
+        matchLabels:
+            verify.flask.target: flask.hello.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                verify.flask.target: flask.hello.pod                
+        spec:
+            hostname: flask-hello
+            containers:
+            - image: localhost:5002/flask-hello
+              name: flask
+              volumeMounts:
+              - mountPath: /mnt/flask-hello
+                name: flask-hello-data
+              ports:
+              - containerPort: 5000        
+            restartPolicy: Always
+            volumes:
+            - name: flask-hello-data
+              persistentVolumeClaim:
+                claimName: flask-hello-data      
+status: {}
+    
