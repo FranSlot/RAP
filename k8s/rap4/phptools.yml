@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata: 
-  name: ampersand-rap
+  name: prod
 ---
 apiVersion: v1
 kind: Secret
@@ -15,7 +15,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: phptools-service
-    #namespace: ampersand-rap
+    namespace: prod
     labels : 
         ampersand.target: phptools.service
 spec:
@@ -36,7 +36,7 @@ metadata:
     labels:
         ampersand.target: phptools.deployment
     name: phptools
-    #namespace: ampersand-rap
+    namespace: prod
 spec:
     selector:
         matchLabels:
@@ -56,14 +56,18 @@ spec:
               - containerPort : 80   
               env:
               - name: PMA_HOST
-                value: rap-db-service
+              # ampersand DB host is db : TODO refactor to rap-db
+                value: db
               - name: PMA_PORT
                 value: "3306"
+              - name: PMA_USER
+                value: root
+              - name: PMA_PASSWORD
+                value: ampersand
               - name: MYSQL_ROOT_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: rap-db-secrets
-                    key: root-password
-"     
+                    name: mysql-pass
+                    key: password
             restartPolicy: Always            
 status: {}

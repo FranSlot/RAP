@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: enroll-service
+    namespace: prod
+    labels : 
+        ampersand.target: enroll.service
+spec:
+    type: NodePort
+    ports:
+    - name: "enroll-http-port"
+      # Not used it spec.type=NodePort
+      port: 80
+      targetPort: 80
+      nodePort: 31104
+    - name: "enroll-https-port"
+      # Not used it spec.type=NodePort
+      port: 443
+      targetPort: 443
+      nodePort: 31105
+    selector:
+        ampersand.target: enroll.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        ampersand.target: enroll.deployment
+    name: enroll
+    namespace: prod
+spec:
+    selector:
+        matchLabels:
+            ampersand.target: enroll.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                ampersand.target: enroll.pod
+        spec:
+            hostname: enroll
+            containers:
+            - image: ampersandtarski/enroll:latest
+              name: rap-db
+              ports:
+              - containerPort : 80        
+              - containerPort : 443   
+              env:
+              - name: AMPERSAND_DEBUG_MODE
+                value: "true" 
+              - name: AMPERSAND_PRODUCTION_MODE
+                value: "false" 
+              - name: AMPERSAND_DBHOST
+                value: db
+              - name: AMPERSAND_DBNAME
+                value: enroll
+              - name: AMPERSAND_DBUSER
+                value: root
+              - name: AMPERSAND_DBPASS
+                value: ampersand
+            restartPolicy: Always              
+status: {}
+    

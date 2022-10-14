@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: prod
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap-db-data
+    namespace: prod
+    labels:
+        ampersand.target: rap.db.data.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap/db/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap.db.pvc
+    name: rap-db-data
+    namespace: prod
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: Service
+metadata:
+    #ampersand database is hardcode in image to db
+    name: db
+    #name: rap-db-service
+    namespace: prod
+    labels : 
+        ampersand.target: rap.db.service
+spec:
+    type: NodePort
+    ports:
+    - name: "rap-db-port"
+      port: 3306
+      targetPort: 3306
+      nodePort: 31100
+    selector:
+        ampersand.target: rap.db.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        ampersand.target: rap.db.deployment
+    name: rap-db
+    namespace: prod
+spec:
+    selector:
+        matchLabels:
+            ampersand.target: rap.db.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                ampersand.target: rap.db.pod
+        spec:
+            hostname: rap-db
+            containers:
+            - image: mariadb:latest
+              name: rap-db
+              args: ["--lower-case-table-names=1", "--sql-mode=ANSI,TRADITIONAL"]  # Whatever is specified here gets appended to the entrypoint defined in the Dockerfile
+              volumeMounts:
+              - mountPath: /var/lib/mysql
+                name: rap-db-data
+              ports:
+              - containerPort : 80
+              env:
+              - name: MYSQL_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: mysql-pass
+                    key: password
+              - name: MYSQL_USER  
+                value: ampersand  # the database user is fixed. No need to make this variable. 
+              - name: MYSQL_PASSWORD
+                value: ampersand          
+            restartPolicy: Always
+            
+            volumes:
+            - name: rap-db-data
+              #azureFile:
+                #secretName: storage-secret
+                #shareName: /var/lib/mysql
+                #readOnly: false
+              persistentVolumeClaim:
+                claimName: rap-db-data      
+status: {}
+    

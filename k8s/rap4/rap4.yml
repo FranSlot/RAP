@@ -6,10 +6,10 @@ metadata:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-    name: rap3-data
+    name: rap4-data
     namespace: prod
     labels:
-        ampersand.target: rap3.data.pv
+        ampersand.target: rap4.data.pv
 spec:
     storageClassName: hostpath
     capacity:
@@ -17,46 +17,14 @@ spec:
     accessModes:
         - ReadWriteOnce
     hostPath:
-        path: "/Users/mwa17610/volumes/k8s/rap3/data"
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-    name: rap3-scripts
-    namespace: prod
-    labels:
-        ampersand.target: rap3.scripts.pv
-spec:
-    storageClassName: hostpath
-    capacity:
-        storage: 200Mi        
-    accessModes:
-        - ReadWriteOnce
-    hostPath:
-        path: "/Users/mwa17610/volumes/k8s/rap3/scripts"
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-    name: rap3-logs
-    namespace: prod
-    labels:
-        ampersand.target: rap3.logs.pv
-spec:
-    storageClassName: hostpath
-    capacity:
-        storage: 200Mi        
-    accessModes:
-        - ReadWriteOnce
-    hostPath:
-        path: "/Users/mwa17610/volumes/k8s/rap3/log"
+        path: "/Users/mwa17610/volumes/k8s/rap4/data"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
     labels:
-        ampersand.target: rap3.data.pvc
-    name: rap3-data
+        ampersand.target: rap4.data.pvc
+    name: rap4-data
     namespace: prod
 spec:
     storageClassName: hostpath
@@ -68,11 +36,27 @@ spec:
 status: {}   
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap4-scripts
+    namespace: prod
+    labels:
+        ampersand.target: rap4.scripts.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap4/scripts"
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
     labels:
-        ampersand.target: rap3.scripts.pvc
-    name: rap3-scripts
+        ampersand.target: rap4.scripts.pvc
+    name: rap4-scripts
     namespace: prod
 spec:
     storageClassName: hostpath
@@ -84,11 +68,27 @@ spec:
 status: {}   
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap4-logs
+    namespace: prod
+    labels:
+        ampersand.target: rap4.logs.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap4/log"
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
     labels:
-        ampersand.target: rap3.logs.pvc
-    name: rap3-logs
+        ampersand.target: rap4.logs.pvc
+    name: rap4-logs
     namespace: prod
 spec:
     storageClassName: hostpath
@@ -102,25 +102,25 @@ status: {}
 apiVersion: v1
 kind: Service
 metadata:
-    name: rap3-service
+    name: rap4-service
     namespace: prod
     labels : 
-        ampersand.target: rap3.service
+        ampersand.target: rap4.service
 spec:
     type: NodePort
     ports:
-    - name: "rap3-http-port"
+    - name: "rap4-http-port"
       # Not used it spec.type=NodePort
       port: 80
       targetPort: 80
       nodePort: 31102
-    - name: "rap3-https-port"
+    - name: "rap4-https-port"
       # Not used it spec.type=NodePort
       port: 443
       targetPort: 443
       nodePort: 31103
     selector:
-        ampersand.target: rap3.pod
+        ampersand.target: rap4.pod
 status: 
     loadBalancer: {}
 ---
@@ -128,51 +128,71 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     labels:
-        ampersand.target: rap3.deployment
-    name: rap3
+        ampersand.target: rap4.deployment
+    name: rap4
     namespace: prod
 spec:
     selector:
         matchLabels:
-            ampersand.target: rap3.pod
+            ampersand.target: rap4.pod
     strategy:
         type: RollingUpdate
     template:
         metadata:
             labels:
-                ampersand.target: rap3.pod
+                ampersand.target: rap4.pod
         spec:
-            hostname: rap3
+            hostname: rap4
             containers:
-            - image: ampersandtarski/ampersand-rap:latest
+            - image: ampersandtarski/ampersand-rap:2021-10-22
               name: rap-db
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "500m"
               volumeMounts:
               - mountPath: /var/www/data
-                name: rap3-data
+                name: rap4-data
               - mountPath: /var/www/data/scripts
-                name: rap3-scripts
+                name: rap4-scripts
               - mountPath: /var/www/log
-                name: rap3-logs
+                name: rap4-logs
               ports:
               - containerPort : 80        
               - containerPort : 443   
               env:
+              - name: AMPERSAND_DEBUG_MODE
+                value: "true" 
+              - name: AMPERSAND_PRODUCTION_MODE
+                value: "false" 
               - name: AMP_PROTO_ENV_NAME
                 value: default  
-              # - name: AMPERSAND_DBHOST
-              #  value: db
-              # - name: AMPERSAND_DBNAME
-              #  value: ampersand
+              - name: AMPERSAND_DBHOST
+                value: db
+              - name: AMPERSAND_DBNAME
+                value: rap4
+              - name: AMPERSAND_DBUSER
+                value: root
+              - name: AMPERSAND_DBPASS
+                valueFrom:
+                  secretKeyRef:
+                    name: mysql-pass
+                    key: password
+              - name: RAP_STUDENT_PROTO_IMAGE
+                value: ampersandtarski/rap4-student-prototype:v1.1.1
             restartPolicy: Always           
             volumes:
-            - name: rap3-data
+            - name: rap4-data
               persistentVolumeClaim:
-                claimName: rap3-data      
-            - name: rap3-scripts
+                claimName: rap4-data      
+            - name: rap4-scripts
               persistentVolumeClaim:
-                claimName: rap3-scripts      
-            - name: rap3-logs
+                claimName: rap4-scripts      
+            - name: rap4-logs
               persistentVolumeClaim:
-                claimName: rap3-logs     
+                claimName: rap4-logs     
 status: {}
     

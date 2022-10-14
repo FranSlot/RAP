@@ -44,7 +44,7 @@ spec:
         spec:
             hostname: rap-db
             containers:
-            - image: ampersandtarski/rap3-db
+            - image: ampersandtarski/rap4-db
               name: rap-db
               volumeMounts:
               - mountPath: /var/lib/mysql

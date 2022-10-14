@@ -1,0 +1,14 @@
+kubectl delete svc db
+kubectl delete deployment rap-db
+kubectl delete pvc rap-db-data
+kubectl delete pv rap-db-data
+for pod in $(kubectl get pod | grep rap-db | cut -d' ' -f1);do echo kubectl delete pod $pod;done
+kubectl delete svc rap4-service
+kubectl delete deployment rap4
+kubectl delete pvc rap4-data
+kubectl delete pv rap4-data
+kubectl delete pvc rap4-logs
+kubectl delete pv rap4-logs
+kubectl delete pvc rap4-scripts
+kubectl delete pv rap4-scripts
+for pod in $(kubectl get pod | grep rap4 | cut -d' ' -f1);do echo kubectl delete pod $pod;done

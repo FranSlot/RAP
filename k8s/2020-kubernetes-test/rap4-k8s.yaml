@@ -1,0 +1,178 @@
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: prod
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap4-data
+    namespace: prod
+    labels:
+        ampersand.target: rap4.data.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap4/data"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap4-scripts
+    namespace: prod
+    labels:
+        ampersand.target: rap4.scripts.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap4/scripts"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: rap4-logs
+    namespace: prod
+    labels:
+        ampersand.target: rap4.logs.pv
+spec:
+    storageClassName: hostpath
+    capacity:
+        storage: 200Mi        
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/Users/mwa17610/volumes/k8s/rap4/log"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap4.data.pvc
+    name: rap4-data
+    namespace: prod
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap4.scripts.pvc
+    name: rap4-scripts
+    namespace: prod
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    labels:
+        ampersand.target: rap4.logs.pvc
+    name: rap4-logs
+    namespace: prod
+spec:
+    storageClassName: hostpath
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Mi
+status: {}   
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: rap4-service
+    namespace: prod
+    labels : 
+        ampersand.target: rap4.service
+spec:
+    type: NodePort
+    ports:
+    - name: "rap4-http-port"
+      # Not used it spec.type=NodePort
+      port: 80
+      targetPort: 80
+      nodePort: 31102
+    - name: "rap4-https-port"
+      # Not used it spec.type=NodePort
+      port: 443
+      targetPort: 443
+      nodePort: 31103
+    selector:
+        ampersand.target: rap4.pod
+status: 
+    loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        ampersand.target: rap4.deployment
+    name: rap4
+    namespace: prod
+spec:
+    selector:
+        matchLabels:
+            ampersand.target: rap4.pod
+    strategy:
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                ampersand.target: rap4.pod
+        spec:
+            hostname: rap4
+            containers:
+            - image: ampersandtarski/ampersand-rap:2021-10-22
+              name: rap-db
+              volumeMounts:
+              - mountPath: /var/www/data
+                name: rap4-data
+              - mountPath: /var/www/data/scripts
+                name: rap4-scripts
+              - mountPath: /var/www/log
+                name: rap4-logs
+              ports:
+              - containerPort : 80        
+              - containerPort : 443   
+              env:
+              - name: AMP_PROTO_ENV_NAME
+                value: default  
+              # - name: AMPERSAND_DBHOST
+              #  value: db
+              # - name: AMPERSAND_DBNAME
+              #  value: ampersand
+            restartPolicy: Always           
+            volumes:
+            - name: rap4-data
+              persistentVolumeClaim:
+                claimName: rap4-data      
+            - name: rap4-scripts
+              persistentVolumeClaim:
+                claimName: rap4-scripts      
+            - name: rap4-logs
+              persistentVolumeClaim:
+                claimName: rap4-logs     
+status: {}
+    

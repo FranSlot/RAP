@@ -12,9 +12,9 @@ jdbc:mysql://localhost:3306/mysql
 # connection URL
 
 # RAP 3 structure
-3 PODS, phptools, rap3 and rap-db
+3 PODS, phptools, rap4 and rap-db
 
-# RAP3 in kubernetes
+# rap4 in kubernetes
 for f in *k8s.yaml;do kubectl apply -f $f;done
 # PHP tools
 kubectl apply -f phptools.yaml
@@ -22,7 +22,7 @@ kubectl apply -f phptools.yaml
 for f in *.yaml;do kubectl apply -f $f;done
 
 # URL's op localhost : 
-RAP3 : http://localhost:31102/RAP3/#/Login
+rap4 : http://localhost:31102/rap4/#/Login
 PHP tools : http://localhost:31101
 
 # Cleanup (use CTRL-C to continue on 'waits')
@@ -44,7 +44,7 @@ POD2 -|
 stdin , in een container laden
 
 ExecEngineFunctions.php ("prototype")
-docker 1 rap3, script via stdin -> 
+docker 1 rap4, script via stdin -> 
 
 - continuous deployment (gitlab TNO, koppeling naar K8S cluster, merge naar master triggert PROD )
 
