@@ -51,7 +51,14 @@ spec:
             hostname: phptools
             containers:
             - image: phpmyadmin/phpmyadmin
-              name: phptools        
+              name: phptools
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "500m"        
               ports:     
               - containerPort : 80   
               env:
@@ -63,11 +70,10 @@ spec:
               - name: PMA_USER
                 value: root
               - name: PMA_PASSWORD
-                value: ampersand
-              - name: MYSQL_ROOT_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: mysql-pass
-                    key: password
+                value: rootpassword
+                # valueFrom:
+                #   secretKeyRef:
+                #     name: mysql-pass
+                #     key: password
             restartPolicy: Always            
 status: {}

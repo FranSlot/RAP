@@ -50,6 +50,13 @@ spec:
             containers:
             - image: ampersandtarski/enroll:latest
               name: rap-db
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "500m"
               ports:
               - containerPort : 80        
               - containerPort : 443   
@@ -65,7 +72,11 @@ spec:
               - name: AMPERSAND_DBUSER
                 value: root
               - name: AMPERSAND_DBPASS
-                value: ampersand
+                value: rootpassword
+                # valueFrom:
+                #   secretKeyRef:
+                #     name: mysql-pass
+                #     key: password
             restartPolicy: Always              
 status: {}
     

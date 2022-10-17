@@ -78,6 +78,13 @@ spec:
             containers:
             - image: mariadb:latest
               name: rap-db
+            #   resources:
+            #     requests:
+            #       memory: "64Mi"
+            #       cpu: "250m"
+            #     limits:
+            #       memory: "128Mi"
+            #       cpu: "500m"
               args: ["--lower-case-table-names=1", "--sql-mode=ANSI,TRADITIONAL"]  # Whatever is specified here gets appended to the entrypoint defined in the Dockerfile
               volumeMounts:
               - mountPath: /var/lib/mysql
@@ -86,14 +93,15 @@ spec:
               - containerPort : 80
               env:
               - name: MYSQL_ROOT_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: mysql-pass
-                    key: password
+                value: rootpassword
+                # valueFrom:
+                #   secretKeyRef:
+                #     name: mysql-pass
+                #     key: password
               - name: MYSQL_USER  
                 value: ampersand  # the database user is fixed. No need to make this variable. 
               - name: MYSQL_PASSWORD
-                value: ampersand          
+                value: password          
             restartPolicy: Always
             
             volumes:

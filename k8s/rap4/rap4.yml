@@ -132,6 +132,7 @@ metadata:
     name: rap4
     namespace: prod
 spec:
+    replicas: 1
     selector:
         matchLabels:
             ampersand.target: rap4.pod
@@ -177,10 +178,11 @@ spec:
               - name: AMPERSAND_DBUSER
                 value: root
               - name: AMPERSAND_DBPASS
-                valueFrom:
-                  secretKeyRef:
-                    name: mysql-pass
-                    key: password
+                value: rootpassword
+                # valueFrom:
+                #   secretKeyRef:
+                #     name: mysql-pass
+                #     key: password
               - name: RAP_STUDENT_PROTO_IMAGE
                 value: ampersandtarski/rap4-student-prototype:v1.1.1
             restartPolicy: Always           
