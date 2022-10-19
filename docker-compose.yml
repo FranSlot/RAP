@@ -3,6 +3,14 @@ version: '3.7'
 #      docker run --rm -it --name dcv -v $(pwd):/input pmsipilot/docker-compose-viz render -f -m image docker-compose.yml -o documentation/docker-compose.png
 # run it literally (change NOTHING!) and expect the result in documentation/docker-compose.png
 
+#Use the following volumes when deploying localy
+# volumes:
+#   rap4-data:
+#   db-data:
+#   letsencrypt:
+
+
+#Use the following volumes when deploying to Azure
 volumes:
   rap4-data: 
     driver: azure_file
@@ -30,6 +38,7 @@ services:
   # reverse proxy
   traefik:
     image: "traefik:v2.2"
+    cpuset: 0,1
     container_name: "traefik"
     restart: always
     ports:
@@ -88,6 +97,12 @@ services:
       options:
         max-size: "200k"
         max-file: "100"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+        reservations:
+          cpus: '0.25'
 
 # demo application Enrollment
   enroll:
@@ -121,6 +136,12 @@ services:
       options:
         max-size: "200k"
         max-file: "100"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+        reservations:
+          cpus: '0.25'
  
   db:
     container_name: rap4-db
@@ -141,6 +162,12 @@ services:
       options:
         max-size: "200k"
         max-file: "100"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+        reservations:
+          cpus: '0.25'
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -159,6 +186,12 @@ services:
     networks:
       - rap_db
       - proxy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+        reservations:
+          cpus: '0.25'
 
   # test-elf:
   #   image:  ampersandtarski/gatling:3.7.2
