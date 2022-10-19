@@ -5,8 +5,20 @@ version: '3.7'
 
 volumes:
   rap4-data: 
+    driver: azure_file
+    driver_opts:
+      share_name: a-team
+      storage_account_name: stgampersand
   db-data:
+    driver: azure_file
+    driver_opts:
+      share_name: a-team
+      storage_account_name: stgampersand
   letsencrypt:
+    driver: azure_file
+    driver_opts:
+      share_name: a-team
+      storage_account_name: stgampersand
 
 networks:
   proxy: # network name is used by RAP4 script to make student prototype container accessible via traefik ingress
@@ -24,9 +36,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./Traefik/traefik.toml:/etc/traefik/traefik.toml"
-      - "./Traefik/conf.d:/etc/traefik/conf.d"
+      # - "/var/run/docker.sock:/var/run/docker.sock"
+      # - "./Traefik/traefik.toml:/etc/traefik/traefik.toml"
+      # - "./Traefik/conf.d:/etc/traefik/conf.d"
       - "letsencrypt:/letsencrypt"
     networks:
       - proxy
@@ -61,15 +73,15 @@ services:
       - APACHE_RUN_DIR=/var/www
     volumes:
       - rap4-data:/var/www/data
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      # - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - proxy
       - rap_db
       - testchannel
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.rap4-insecure.rule: Host(`${SERVER_HOST_NAME}`)
-      traefik.docker.network: proxy
+    # labels:
+    #   traefik.enable: "true"
+    #   traefik.http.routers.rap4-insecure.rule: Host(`${SERVER_HOST_NAME}`)
+    #   traefik.docker.network: proxy
       # more labels added for production, see ./docker-compose.prod.yml file
     logging:
       driver: "json-file"
@@ -99,10 +111,10 @@ services:
       - AMPERSAND_DBPASS=${MYSQL_AMPERSAND_PASSWORD} # from .env file
       - AMPERSAND_DBNAME=enroll
       - AMPERSAND_SERVER_URL=https://${SERVER_HOST_NAME} # from .env file
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.enroll-insecure.rule: Host(`enroll.${SERVER_HOST_NAME}`)
-      traefik.docker.network: proxy
+    # labels:
+    #   traefik.enable: "true"
+    #   traefik.http.routers.enroll-insecure.rule: Host(`enroll.${SERVER_HOST_NAME}`)
+    #   traefik.docker.network: proxy
       # more labels added for production, see ./docker-compose.prod.yml file
     logging:
       driver: "json-file"
@@ -121,7 +133,7 @@ services:
       - MYSQL_PASSWORD=${MYSQL_AMPERSAND_PASSWORD} # from .env file
     volumes:
       - db-data:/var/lib/mysql
-      - ./db-init-scripts:/docker-entrypoint-initdb.d # script to setup db authorization for user ampersand. 
+      # - ./db-init-scripts:/docker-entrypoint-initdb.d # script to setup db authorization for user ampersand. 
     networks:
       - rap_db
     logging:
@@ -136,11 +148,11 @@ services:
       PMA_HOST: db # refers to database service above
     container_name: phpmyadmin
     restart: unless-stopped
-    labels:
-      traefik.enable: "true"
-      traefik.domain: ${SERVER_HOST_NAME}
-      traefik.http.routers.phpmyadmin-insecure.rule: Host(`phpmyadmin.${SERVER_HOST_NAME}`)
-      traefik.docker.network: proxy
+    # labels:
+    #   traefik.enable: "true"
+    #   traefik.domain: ${SERVER_HOST_NAME}
+    #   traefik.http.routers.phpmyadmin-insecure.rule: Host(`phpmyadmin.${SERVER_HOST_NAME}`)
+    #   traefik.docker.network: proxy
     depends_on:
       - db
       - traefik
@@ -148,23 +160,23 @@ services:
       - rap_db
       - proxy
 
-  test-elf:
-    image:  ampersandtarski/gatling:3.7.2
-    container_name: gatling
-    build:
-      context: gatling-3-7-2
-    # restart: unless-stopped     # run only once, so never restart
-    command: "-s RAPtest"
-    volumes:
-      - ./gatling-3-7-2/conf:/opt/gatling/conf
-      - ./gatling-3-7-2/results:/opt/gatling/results
-      - ./gatling-3-7-2/user-files:/opt/gatling/user-files
-    depends_on:
-      - rap4
-    networks:
-      - testchannel
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "100"
+  # test-elf:
+  #   image:  ampersandtarski/gatling:3.7.2
+  #   container_name: gatling
+  #   build:
+  #     context: gatling-3-7-2
+  #   # restart: unless-stopped     # run only once, so never restart
+  #   command: "-s RAPtest"
+  #   # volumes:
+  #     # - ./gatling-3-7-2/conf:/opt/gatling/conf
+  #     # - ./gatling-3-7-2/results:/opt/gatling/results
+  #     # - ./gatling-3-7-2/user-files:/opt/gatling/user-files
+  #   depends_on:
+  #     - rap4
+  #   networks:
+  #     - testchannel
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "200k"
+  #       max-file: "100"
